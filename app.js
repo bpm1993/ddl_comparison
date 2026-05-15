@@ -229,7 +229,6 @@
       }
     }
 
-    const pathsInA = new Set(rowsA.map((r) => r.path));
     const added = rowsB.filter((r) => !usedB.has(r.path));
 
     for (const addedRow of added) {
@@ -237,10 +236,9 @@
       let insertAfter = -1;
       for (let j = bIndex - 1; j >= 0; j--) {
         const prevPath = rowsB[j].path;
-        if (pathsInA.has(prevPath)) {
-          insertAfter = result.findIndex(
-            (r) => (r.a && r.a.path === prevPath) || (r.b && r.b.path === prevPath)
-          );
+        const anchorPath = insertionAnchorPath(prevPath, addedRow.path);
+        insertAfter = findLastPathInResult(result, anchorPath);
+        if (insertAfter !== -1) {
           break;
         }
       }
@@ -253,6 +251,45 @@
     }
 
     return result;
+  }
+
+  function insertionAnchorPath(prevPath, addedPath) {
+    const addedParent = parentPath(addedPath);
+    if (!addedParent) return prevPath;
+    if (prevPath === addedParent || isAncestorPath(prevPath, addedPath)) return prevPath;
+    if (isAncestorPath(addedParent, prevPath)) return immediateChildPath(prevPath, addedParent);
+    return prevPath;
+  }
+
+  function findLastPathInResult(rows, path) {
+    let index = -1;
+    for (let i = 0; i < rows.length; i++) {
+      const aPath = rows[i].a && rows[i].a.path;
+      const bPath = rows[i].b && rows[i].b.path;
+      if (isSameOrDescendantPath(aPath, path) || isSameOrDescendantPath(bPath, path)) {
+        index = i;
+      }
+    }
+    return index;
+  }
+
+  function parentPath(path) {
+    const idx = path.lastIndexOf(".");
+    return idx === -1 ? "" : path.slice(0, idx);
+  }
+
+  function isAncestorPath(ancestor, path) {
+    return Boolean(ancestor) && path.startsWith(`${ancestor}.`);
+  }
+
+  function isSameOrDescendantPath(path, parent) {
+    return Boolean(path) && (path === parent || isAncestorPath(parent, path));
+  }
+
+  function immediateChildPath(path, parent) {
+    const rest = path.slice(parent.length + 1);
+    const nextDot = rest.indexOf(".");
+    return nextDot === -1 ? path : `${parent}.${rest.slice(0, nextDot)}`;
   }
 
   // ---------- Render helpers ----------
