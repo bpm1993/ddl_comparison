@@ -19,7 +19,7 @@ A lightweight, zero-dependency web tool for comparing two DDL table schemas, ren
 1. Open the [live demo](https://bpm1993.github.io/ddl_comparison/) (or `index.html` locally - no build step required).
 2. Paste the output of `df.schema.toDDL()` from your "before" table into **DDL A**.
 3. Paste the output from your "after" table into **DDL B**.
-4. Click **Comparar**. Use **Carregar exemplo** to see a sample with nested structs and arrays.
+4. Click **Compare**. Use **Load example** to see a sample with nested structs and arrays.
 
 ### Input format
 
